@@ -1,4 +1,4 @@
-const cricketQuestions = [
+const question = [
   {
     q: "Who won the first ICC Cricket World Cup in 1975?",
     arr: ["Australia", "West Indies", "England", "India"],
@@ -555,65 +555,57 @@ const cricketQuestions = [
     ans: "Mohammad Ashraful",
   },
 ];
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("form");
 
-  let set1 = new Set();
-  while (set1.size < 10) {
-    let k = Math.floor(Math.random() * 93);
-    set1.add(k);
-  }
 
-  const setArray = Array.from(set1);
+// ✅ Get 10 random questions from question[]
+function getRandomQuestions(arr, count) {
+  return arr.sort(() => 0.5 - Math.random()).slice(0, count);
+}
 
-  for (let i = 0; i < 10; i++) {
-    let k = setArray[i];
-    let obj = cricketQuestions[k];
+const selectedQuestions = getRandomQuestions(question, 10); // ✅ No conflict with `question[]`
 
-    const ele1 = document.createElement("p");
-    ele1.textContent = `${i + 1}. ${obj.q}`;
-    form.append(ele1);
+const questionArea = document.getElementById("question-area");
+const form = document.getElementById("quiz-form");
+const resultDiv = document.getElementById("div2");
 
-    for (let j = 0; j < 4; j++) {
-      const label = document.createElement("label");
-      const input = document.createElement("input");
-      input.type = "radio";
-      input.name = `${k}`;
-      input.value = obj.arr[j];
+// Render questions
+selectedQuestions.forEach((item, index) => {
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("question-block");
 
-      label.appendChild(input);
-      label.append(` ${obj.arr[j]}`);
-      form.append(label);
-      form.append(document.createElement("br"));
-    }
+  const qText = document.createElement("p");
+  qText.classList.add("question-text");
+  qText.innerText = `${index + 1}. ${item.q}`;
+  wrapper.appendChild(qText);
 
-    form.append(document.createElement("br"));
-    form.append(document.createElement("hr"));
-  }
+  item.arr.forEach(option => {
+    const label = document.createElement("label");
+    label.classList.add("option-label");
 
-  const bu = document.createElement("button");
-  bu.type = "submit";
-  bu.innerHTML = "SUBMIT";
-  form.appendChild(bu); 
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = `q${index}`;
+    input.value = option;
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    let cnt = 0;
-    const data = new FormData(form);
-    for (let [key, value] of data.entries()) {
-      if (cricketQuestions[Number(key)].ans === value) {
-        cnt++;
-      }
-    }
-
-    const old = document.getElementById("div2");
-    if (old) old.remove();
-
-    const ele = document.createElement("div");
-    ele.id = "div2";
-    ele.innerHTML = `Your score is ${cnt} out of 10`;
-    const y = document.getElementById("div1");
-    y.insertAdjacentElement("beforeend", ele);
+    label.appendChild(input);
+    label.append(` ${option}`);
+    wrapper.appendChild(label);
   });
+
+  questionArea.appendChild(wrapper);
+});
+
+// Submit & Score
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  let score = 0;
+
+  selectedQuestions.forEach((item, index) => {
+    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+    if (selected && selected.value === item.ans) {
+      score++;
+    }
+  });
+
+  resultDiv.textContent = `🎯 Your Score: ${score} / ${selectedQuestions.length}`;
 });
